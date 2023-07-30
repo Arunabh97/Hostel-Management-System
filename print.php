@@ -92,11 +92,6 @@
             $pdf->Cell(0, 10, $row['capacity'], 0, 1);
 
             $pdf->SetFont('helvetica', 'B', 12);
-            $pdf->Cell(40, 10, 'Total Price:', 0, 0);
-            $pdf->SetFont('helvetica', '', 12);
-            $pdf->Cell(0, 10, $row['totalPrice'], 0, 1);
-
-            $pdf->SetFont('helvetica', 'B', 12);
             $pdf->Cell(40, 10, 'Booking Date:', 0, 0);
             $pdf->SetFont('helvetica', '', 12);
             $pdf->Cell(0, 10, $row['bookingDate'], 0, 1);
@@ -105,6 +100,11 @@
             $pdf->Cell(40, 10, 'Duration (months):', 0, 0);
             $pdf->SetFont('helvetica', '', 12);
             $pdf->Cell(0, 10, $row['duration'], 0, 1);
+
+            $pdf->SetFont('helvetica', 'B', 12);
+            $pdf->Cell(40, 10, 'Total Price:', 0, 0);
+            $pdf->SetFont('helvetica', '', 12);
+            $pdf->Cell(0, 10, $row['totalPrice'], 0, 1);
 
             $pdf->Output('room_details.pdf', 'I');
         } else {

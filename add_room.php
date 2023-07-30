@@ -142,11 +142,7 @@
     <div class="form-container">
         <form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>">
             <div class="form-group">
-                <div class="card">
-                    <label for="roomId"><i class="fas fa-id-badge"></i> Room ID:</label>
-                    <input type="text" id="roomId" name="roomId" required placeholder="Enter room ID">
-                </div>
-            </div>
+                
 
             <div class="form-group">
                 <div class="card">
@@ -175,25 +171,32 @@
     </div>
 
     <?php
+include 'db.php';
 
-    include 'db.php';
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Generate Room ID dynamically using PHP (e.g., increment from the last room ID in the database)
+    // Replace this example with your own method of generating the Room ID
+    $lastRoomIdQuery = "SELECT MAX(roomId) AS maxRoomId FROM rooms";
+    $result = $conn->query($lastRoomIdQuery);
+    $row = $result->fetch_assoc();
+    $lastRoomId = $row['maxRoomId'];
+    $newRoomId = $lastRoomId + 1;
 
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
- 
-        $roomId = $_POST['roomId'];
-        $roomNumber = $_POST['roomNumber'];
-        $capacity = $_POST['capacity'];
-        $price = $_POST['price'];
+    // Retrieve other form data
+    $roomNumber = $_POST['roomNumber'];
+    $capacity = $_POST['capacity'];
+    $price = $_POST['price'];
 
-        $sql = "INSERT INTO rooms (roomId, roomNumber, capacity, price) VALUES ('$roomId', '$roomNumber', '$capacity', '$price')";
-        if ($conn->query($sql) === TRUE) {
-            echo '<p><center>Room added successfully.</center></p>';
-        } else {
-            echo '<p>Error: ' . $conn->error . '</p>';
-        }
-
-        $conn->close();
+    // Insert the data into the database with the generated Room ID
+    $sql = "INSERT INTO rooms (roomId, roomNumber, capacity, price) VALUES ('$newRoomId', '$roomNumber', '$capacity', '$price')";
+    if ($conn->query($sql) === TRUE) {
+        echo '<p><center>Room added successfully.</center></p>';
+    } else {
+        echo '<p>Error: ' . $conn->error . '</p>';
     }
-    ?>
+
+    $conn->close();
+}
+?>
 </body>
 </html>

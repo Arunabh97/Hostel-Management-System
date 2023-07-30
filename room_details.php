@@ -222,7 +222,24 @@
 
 <?php
     } else {
-        echo "<h1>Error: Room details not found!</h1>";
+        echo '<!DOCTYPE html>
+              <html>
+              <head>
+                  <title>Room Details - Hostel Management System</title>
+                  <!-- Add any necessary meta tags and stylesheets -->
+              </head>
+              <body>
+                  <div class="container">
+                      <div class="header">
+                          <h1>ROOM DETAILS</h1>
+                      </div>
+                      <h2>Error: Room details not found!</h2>
+                      <div class="back-btn">
+                          <a href="student_dashboard.php">Back to Dashboard</a>
+                      </div>
+                  </div>
+              </body>
+              </html>';
     }
 
     mysqli_close($conn);

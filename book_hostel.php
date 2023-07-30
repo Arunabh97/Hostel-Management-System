@@ -48,7 +48,12 @@ if ($userRole === 'student' && isset($_SESSION['regNo'])) {
     $bookingCount = $row['count'];
 
     if ($bookingCount > 0) {
+        // The student has already booked a hostel
         $message = "You have already made a booking.";
+        $showForm = false; // Set this flag to prevent showing the form
+    } else {
+        // The student has not booked a hostel, show the form
+        $showForm = true;
     }
 }
 
@@ -56,7 +61,12 @@ if (isset($_POST['bookHostel'])) {
     if (!empty($message)) {
         $message = "You have already made a booking.";
     } else {
-
+        // Fetch the last Hostel ID from the database and increment it
+        $sql = "SELECT MAX(hostelId) AS maxHostelId FROM hostel";
+        $result = $conn->query($sql);
+        $row = $result->fetch_assoc();
+        $lastHostelId = $row['maxHostelId'];
+        $newHostelId = $lastHostelId + 1;
         $regNo = $_POST['regNo'];
         $firstName = $_POST['firstName'];
         $lastName = $_POST['lastName'];
@@ -67,7 +77,6 @@ if (isset($_POST['bookHostel'])) {
         $roomNumber = $_POST['roomNumber'];
         $capacity = $_POST['capacity'];
         $price = $_POST['price'];
-        $hostelId = $_POST['hostelId'];
         $bookingDate = $_POST['bookingDate'];
         $duration = $_POST['duration'];
         $totalPrice = $_POST['totalPrice'];
@@ -110,7 +119,7 @@ if (isset($_POST['bookHostel'])) {
 
             if (empty($errors)) {
                 $sql = "INSERT INTO hostel (hostelId, regNo, firstName, lastName, gender, course, contact, email, roomNumber, capacity, price, bookingDate, duration, totalPrice) 
-                VALUES ('$hostelId', '$regNo', '$firstName', '$lastName', '$gender', '$course', '$contact', '$email', '$roomNumber', '$capacity', '$price', '$bookingDate', '$duration', '$totalPrice')";
+                VALUES ('$newHostelId', '$regNo', '$firstName', '$lastName', '$gender', '$course', '$contact', '$email', '$roomNumber', '$capacity', '$price', '$bookingDate', '$duration', '$totalPrice')";
 
                 if ($conn->query($sql) === TRUE) {
                     $message = "Hostel booking successful!";
@@ -285,45 +294,81 @@ $conn->close();
         margin-bottom: 10px;
         border-radius: 4px;
     }
+    #availabilityStatus {
+        /* Your default text color, e.g., black */
+        color: red;
+    }
         
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Fetch student details based on registration number
-            $('#regNo').change(function() {
-                var regNo = $(this).val();
-                $.ajax({
-                    url: 'fetch_student.php',
-                    type: 'POST',
-                    data: { regNo: regNo },
-                    dataType: 'json',
-                    success: function(response) {
-                        $('#firstName').val(response.firstName);
-                        $('#lastName').val(response.lastName);
-                        $('#gender').val(response.gender);
-                        $('#course').val(response.course);
-                        $('#contact').val(response.contact);
-                        $('#email').val(response.email);
-                    }
-                });
+        // Function to fetch student details based on registration number
+        function fetchStudentDetails(regNo) {
+            $.ajax({
+                url: 'fetch_student.php',
+                type: 'POST',
+                data: { regNo: regNo },
+                dataType: 'json',
+                success: function(response) {
+                    $('#firstName').val(response.firstName);
+                    $('#lastName').val(response.lastName);
+                    $('#gender').val(response.gender);
+                    $('#course').val(response.course);
+                    $('#contact').val(response.contact);
+                    $('#email').val(response.email);
+                }
             });
+        }
+
+        // Fetch student details automatically when logged in as a student
+        <?php if ($userRole === 'student') { ?>
+            var regNo = '<?php echo $_SESSION['regNo']; ?>';
+            fetchStudentDetails(regNo);
+        <?php } ?>
+
+        // Bind change event to the regNo input field
+        $('#regNo').change(function() {
+            var regNo = $(this).val();
+            fetchStudentDetails(regNo);
+        });
 
             // Fetch room details based on room number
             $('#roomNumber').change(function() {
-                var roomNumber = $(this).val();
-                $.ajax({
-                    url: 'fetch_room.php',
-                    type: 'POST',
-                    data: { roomNumber: roomNumber },
-                    dataType: 'json',
-                    success: function(response) {
-                        $('#capacity').val(response.capacity);
-                        $('#price').val(response.price);
-                    }
-                });
-            });
-
+    var roomNumber = $(this).val();
+    if (roomNumber !== '') {
+        $.ajax({
+            url: 'check_room_availability.php', // Replace with the actual URL to fetch room availability
+            type: 'POST',
+            data: { roomNumber: roomNumber },
+            dataType: 'json',
+            success: function(response) {
+                console.log(response); // Check the response data in the browser console
+                if (response.available) {
+                    console.log('Room is Available'); // Verify this message is logged when the room is available
+                    $('#availabilityStatus').html('Room is Available');
+                    $('#capacity').val(response.capacity);
+                    $('#price').val(response.price);
+                } else {
+                    console.log('Room is Fully Booked'); // Verify this message is logged when the room is fully booked
+                    $('#availabilityStatus').html('Room is Fully Booked. Please choose another room.');
+                    $('#capacity').val('');
+                    $('#price').val('');
+                }
+            },
+            error: function() {
+                console.log('Error: Failed to check room availability.'); // Verify this message is logged in case of an error
+                $('#availabilityStatus').html('Failed to check room availability. Please try again later.');
+                $('#capacity').val('');
+                $('#price').val('');
+            }
+        });
+    } else {
+        $('#availabilityStatus').html(''); // Clear the availability status if no room is selected
+        $('#capacity').val('');
+        $('#price').val('');
+    }
+});
             
             $('#duration').change(function() {
                 calculatePrice(); 
@@ -388,10 +433,6 @@ if (!isset($totalPrice)) {
         <?php echo $message; ?>
     </div>
 <?php endif; ?>
-        <div class="card">
-            <label for="hostelId"><i class="fas fa-id-card"></i> Hostel Id:</label>
-            <input type="text" name="hostelId" id="hostelId" required placeholder="Enter hostel ID">
-        </div>
 
         <div class="card">
             <label for="regNo"><i class="fas fa-id-badge"></i> Registration Number:</label>
@@ -412,9 +453,9 @@ if (!isset($totalPrice)) {
             <label for="gender"><i class="fas fa-venus-mars"></i> Gender:</label>
             <select name="gender" id="gender" required>
                 <option value="">Select Gender</option>
-                <option value="male" <?php if ($userRole === 'student' && $gender === 'male') { echo 'selected'; } ?>>Male</option>
-                <option value="female" <?php if ($userRole === 'student' && $gender === 'female') { echo 'selected'; } ?>>Female</option>
-                <option value="other" <?php if ($userRole === 'student' && $gender === 'other') { echo 'selected'; } ?>>Other</option>
+                <option value="Male" <?php if ($userRole === 'student' && $gender === 'Male') { echo 'selected'; } ?>>Male</option>
+                <option value="Female" <?php if ($userRole === 'student' && $gender === 'Female') { echo 'selected'; } ?>>Female</option>
+                <option value="Other" <?php if ($userRole === 'student' && $gender === 'Other') { echo 'selected'; } ?>>Other</option>
             </select>
         </div>
 
@@ -436,11 +477,12 @@ if (!isset($totalPrice)) {
         <div class="card">
             <label for="roomNumber"><i class="fas fa-door-open"></i> Room Number:</label>
             <input type="text" id="roomNumber" name="roomNumber" required placeholder="Enter room number">
+            <div id="availabilityStatus"></div>
         </div>
 
         <div class="card">
             <label for="capacity"><i class="fas fa-users"></i> Capacity:</label>
-            <input type="text" id="capacity" name="capacity" required placeholder="Enter capacity">
+            <input type="text" id="capacity" name="capacity" required placeholder="Enter capacity" readonly>
         </div>
 
         <div class="card">
@@ -479,6 +521,7 @@ if (!isset($totalPrice)) {
 
         <input type="submit" name="bookHostel" value="Book Hostel">
         <input type="reset" value="Reset">
+        
         <a class="dashboard-button" href="<?php echo $dashboardURL; ?>"> Back to Dashboard</a>
         
     </form>

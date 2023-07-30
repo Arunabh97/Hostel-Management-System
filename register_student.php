@@ -22,6 +22,10 @@
         form {
             max-width: 400px;
             margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .card {
@@ -159,9 +163,9 @@
     <label for="gender"><i class="fas fa-venus-mars"></i> Gender:</label>
     <select name="gender" id="gender" required>
         <option value="">Select Gender</option>
-        <option value="male">Male</option>
-        <option value="female">Female</option>
-        <option value="other">Other</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
     </select>
 </div>
 
@@ -195,54 +199,62 @@
     <input type="reset" value="Reset">
     <a class="dashboard-button" href="admin_dashboard.php">Back to Dashboard</a>
 
-        <?php
+    <?php 
 
-        if (isset($_POST['register'])) {
-    
-            $regNo = $_POST['regNo'];
-            $firstName = $_POST['firstName'];
-            $lastName = $_POST['lastName'];
-            $gender = $_POST['gender'];
-            $course = $_POST['course'];
-            $contact = $_POST['contact'];
-            $email = $_POST['email'];
-            $password = $_POST['password'];
-            $confirmPassword = $_POST['confirmPassword'];
 
-    
-            $errors = array();
+if (isset($_POST['register'])) {
 
-            if ($password !== $confirmPassword) {
-                $errors[] = "Passwords do not match.";
-            }
+    $regNo = $_POST['regNo'];
+    $firstName = $_POST['firstName'];
+    $lastName = $_POST['lastName'];
+    $gender = $_POST['gender'];
+    $course = $_POST['course'];
+    $contact = $_POST['contact'];
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    $confirmPassword = $_POST['confirmPassword'];
 
-            if (!empty($errors)) {
-                echo '<div class="error-message">';
-                foreach ($errors as $error) {
-                    echo '<p>' . $error . '</p>';
-                }
-                echo '</div>';
-            } else {
-        
-                $sql = "INSERT INTO student (regNo, firstName, lastName, gender, course, contact, email, password) 
-                        VALUES ('$regNo', '$firstName', '$lastName', '$gender', '$course','$contact', '$email', '$password')";
+    $errors = array();
 
-                if ($conn->query($sql) === TRUE) {
-                    echo "<b><p>Registration successful!</p></b>";
-                    echo "<p>Registration Number: " . $regNo . "</p>";
-                    echo "<p>Name: " . $firstName . " " . $lastName . "</p>";
-                    echo "<p>Gender: " . $gender . "</p>";
-                    echo "<p>Course: " . $course . "</p>";
-                    echo "<p>Contact: " . $contact . "</p>";
-                    echo "<p>Email: " . $email . "</p>";
-                } else {
-                    echo "Error: " . $sql . "<br>" . $conn->error;
-                }
-            }
+    if ($password !== $confirmPassword) {
+        $errors[] = "Passwords do not match.";
+    }
+
+    $checkQuery = "SELECT * FROM student WHERE regNo = '$regNo'";
+    $checkResult = $conn->query($checkQuery);
+    if ($checkResult->num_rows > 0) {
+        $errors[] = "Registration number already exists.";
+    }
+
+    if (!empty($errors)) {
+        echo '<div class="error-message">';
+        foreach ($errors as $error) {
+            echo '<p>' . $error . '</p>';
         }
+        echo '</div>';
+    } else {
+      
+        $sql = "INSERT INTO student (regNo, firstName, lastName, gender, course, contact, email, password) 
+                VALUES ('$regNo', '$firstName', '$lastName', '$gender', '$course','$contact', '$email', '$password')";
 
-        $conn->close();
-        ?>
-    </form>
+        if ($conn->query($sql) === TRUE) {
+  
+            echo "<b><p>Registration successful!</p></b>";
+            echo "<p>Registration Number: " . $regNo . "</p>";
+            echo "<p>Name: " . $firstName . " " . $lastName . "</p>";
+            echo "<p>Gender: " . $gender . "</p>";
+            echo "<p>Course: " . $course . "</p>";
+            echo "<p>Contact: " . $contact . "</p>";
+            echo "<p>Email: " . $email . "</p>";
+        } else {
+            echo "Error: " . $sql . "<br>" . $conn->error;
+        }
+    }
+}
+
+$conn->close();
+?>
+
+</form>
 </body>
 </html>

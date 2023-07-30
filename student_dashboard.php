@@ -246,40 +246,97 @@
             display: none;
             background-color: #fff;
             border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            /* Add animation properties */
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            animation: fadeInDown 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55) both;
         }
 
         .student-icon:hover .dropdown {
             display: block;
+            /* Add animation properties */
+            opacity: 1;
+            transform: translateY(0);
+            animation: fadeInDown 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55) both;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Additional styles for a cool look */
+        .student-icon {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .student-icon .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+            color: #fff;
+        }
+
+        .student-icon .avatar i {
+            font-size: 24px;
         }
 
         .dropdown ul {
             list-style: none;
-            margin: 0;
             padding: 0;
+            margin: 0;
         }
 
         .dropdown li {
             padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .dropdown li:last-child {
+            border-bottom: none;
         }
 
         .dropdown li a {
-            display: block;
             text-decoration: none;
             color: #333;
+            display: flex;
+            align-items: center;
+            transition: color 0.3s ease;
+        }
+
+        .dropdown li a i {
+            margin-right: 10px;
         }
 
         .dropdown li a:hover {
-            background-color: #f0f0f0;
+            color: #4CAF50;
         }
 
         .about-us {
+            margin-top: 20px;
             margin-left: 20px;
+            height:200px;
             text-align: center;
             background-color: #f9f9f9;
             border-radius: 5px;
-            padding: 50px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
         .about-us h2 {
@@ -289,10 +346,21 @@
 
         .about-us p {
             color: #666;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
     </style>
+    <script>
+        // This JavaScript code is optional and used to close the dropdown when clicking outside it
+        document.addEventListener("click", function(event) {
+            const dropdowns = document.querySelectorAll(".dropdown");
+            dropdowns.forEach(function(dropdown) {
+                if (!dropdown.contains(event.target)) {
+                    dropdown.style.display = "none";
+                }
+            });
+        });
+    </script>
 </head>
 <body>
     <div class="container">
