@@ -25,9 +25,8 @@ if (isset($_POST['login'])) {
         exit;
     } else {
 
-        $errors[] = "<center>Invalid registration number or password.</center>";
+        $errors[] = '<p style="color: red; text-align: center;">Invalid registration number or password.</p>';
     }
-
     if (!empty($errors)) {
         $_SESSION['login_errors'] = $errors;
         header("Location: student_login.php");

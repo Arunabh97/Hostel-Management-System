@@ -13,7 +13,6 @@
     $result = mysqli_query($conn, $query);
 
     if ($result) {
-        
         if ($result->num_rows > 0) {
             $row = mysqli_fetch_assoc($result);
             $firstName = $row['firstName'];
@@ -31,19 +30,23 @@
     }
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $firstName = $_POST['firstName'];
-        $lastName = $_POST['lastName'];
-        $gender = $_POST['gender'];
-        $course = $_POST['course'];
-        $contact = $_POST['contact'];
-        $email = $_POST['email'];
+        if (isset($_POST['update'])) {
+            $firstName = $_POST['firstName'];
+            $lastName = $_POST['lastName'];
+            $gender = $_POST['gender'];
+            $course = $_POST['course'];
+            $contact = $_POST['contact'];
+            $email = $_POST['email'];
 
-        $profileUpdateQuery = "UPDATE student SET firstName='$firstName', lastName='$lastName', gender='$gender', course='$course', contact='$contact', email='$email' WHERE regNo='$regNo'";
+            $profileUpdateQuery = "UPDATE student SET firstName='$firstName', lastName='$lastName', gender='$gender', course='$course', contact='$contact', email='$email' WHERE regNo='$regNo'";
 
-        if ($conn->query($profileUpdateQuery) === TRUE) {
-        } else {
-            echo "Error updating profile: " . $conn->error;
+            if ($conn->query($profileUpdateQuery) === TRUE) {
+                echo "<div class='message success' id='messageBox'>Profile update successful!</div>";
+            } else {
+                echo "<div class='message error' id='messageBox'>Error updating profile: " . $conn->error . "</div>";
+            }
         }
+
         if (isset($_POST['changePassword'])) {
             $currentPassword = $_POST['currentPassword'];
             $newPassword = $_POST['newPassword'];
@@ -61,24 +64,19 @@
                     // Update the password in the database
                     $passwordUpdateQuery = "UPDATE student SET password='$newPassword' WHERE regNo='$regNo'";
                     if ($conn->query($passwordUpdateQuery) === TRUE) {
-                        // Password update successful
+                        echo "<div class='message success' id='messageBox'>Password update successful!</div>";
                     } else {
-                        echo "Error updating password: " . $conn->error;
+                        echo "<div class='message error' id='messageBox'>Error updating password: " . $conn->error . "</div>";
                     }
                 } else {
-                    echo "New password and confirm password do not match.";
+                    echo "<div class='message error' id='messageBox'>New password and confirm password do not match.</div>";
                 }
             } else {
-                echo "Current password is incorrect.";
+                echo "<div class='message error' id='messageBox'>Current password is incorrect.</div>";
             }
         }
-        $row['firstName'] = $firstName;
-        $row['lastName'] = $lastName;
-        $row['gender'] = $gender;
-        $row['course'] = $course;
-        $row['contact'] = $contact;
-        $row['email'] = $email;
     }
+
     $conn->close();
 ?>
 
@@ -89,8 +87,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap">
-    <style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const messageBox = document.getElementById('messageBox');
+            if (messageBox) {
+                messageBox.style.display = 'block';
 
+                setTimeout(function () {
+                    messageBox.style.display = 'none';
+                }, 3000); // Hide the alert after 3 seconds (adjust the duration as needed)
+            }
+        });
+    </script>
+    <style>
+         .message {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            z-index: 9999;
+            animation: fadeInOut 3s ease;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% {
+                opacity: 0;
+            }
+            10%, 90% {
+                opacity: 1;
+            }
+        }
         body {
             font-family: 'Roboto', Arial, sans-serif;
             background-color: #f4f4f4;
@@ -329,5 +369,6 @@
             <a href="student_dashboard.php"><i class="fas fa-arrow-left icon"></i> Back to Dashboard</a>
         </div>
     </div>
+    
 </body>
 </html>
