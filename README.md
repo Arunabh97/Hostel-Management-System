@@ -11,6 +11,7 @@ Features 🛠️
 🎓 Student Registration: Register new students and manage their information.
 📊 Reports: Generate various reports for administrators.
 📱 Responsive Design: User-friendly interface accessible on both desktop and mobile devices.
+
 Technologies 💻
 
 🖥️ Frontend: HTML, CSS, Bootstrap
